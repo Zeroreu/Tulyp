@@ -7,88 +7,113 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background-color: #0d0202; font-family: sans-serif; }
-        canvas { display: block; }
+        :root {
+            --primary: #ffb7b2;
+            --bg: #0a0a0c;
+        }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: var(--bg); font-family: 'Inter', -apple-system, sans-serif; color: white; }
+        
+        /* Overlay Teks */
+        .content {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; pointer-events: none; z-index: 5;
+        }
+
         .instruction {
-            position: absolute; top: 30px; width: 100%; text-align: center;
-            color: #ffb7b2; font-size: 0.8rem; letter-spacing: 2px;
-            animation: blink 2s infinite; z-index: 10;
+            position: absolute; top: 10%; font-size: 0.7rem; letter-spacing: 4px;
+            color: var(--primary); opacity: 0.6; animation: pulse 2s infinite;
         }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-        .message-container {
-            position: absolute; bottom: 8%; width: 100%;
-            text-align: center; color: #fdf2f2; padding: 0 25px;
-            box-sizing: border-box; pointer-events: none;
-            opacity: 0; transition: opacity 3s;
+
+        .message-box {
+            width: 85%; max-width: 400px; opacity: 0; transform: translateY(20px);
+            transition: all 2s ease; margin-top: 150px;
         }
-        .show { opacity: 1 !important; }
-        p { font-size: 0.85rem; line-height: 1.6; max-width: 500px; margin: 0 auto; text-shadow: 1px 1px 5px rgba(0,0,0,1); }
-        b { color: #ff9aa2; }
+
+        .message-box.reveal { opacity: 1; transform: translateY(0); }
+
+        p { font-size: 0.95rem; line-height: 1.8; font-weight: 300; letter-spacing: 0.3px; }
+        b { color: var(--primary); font-weight: 600; }
+        
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
     </style>
 </head>
 <body>
-    <div class="instruction" id="ins">SENTUH LAYARNYA...</div>
-    <div class="message-container" id="msg">
-        <p>
-            Aku mau minta maaf yaa <b>sayangg</b>, tadi aku kurang excited pas <b>ko</b> cerita, harusnya aku bisa lebih nunjukin kalau aku seneng denger cerita <b>ko</b>, apalagi soal kartun <i>the good dinosaur</i> itu... <br><br>
-            Terus aku juga lalai ga bales bubble chat <b>ko</b>, padahal itu hal kecil tapi berarti. Aku ga ada niat buat cuek atau ga peduli, cuma tadi aku lagi ga fokus dan itu salah aku. Maafin aku yaa, aku pengen jadi orang yang selalu hadir penuh buat <b>ko</b>, dengerin cerita <b>ko</b> dengan bener-bener, dan respon dengan antusias kaya yang <b>ko</b> pantas dapet.
-        </p>
+
+    <div class="content">
+        <div class="instruction" id="ins">TAP TO BLOOM</div>
+        <div class="message-box" id="msg">
+            <p>
+                Aku mau minta maaf yaa <b>sayangg</b>, tadi aku kurang excited pas <b>ko</b> cerita, harusnya aku bisa lebih nunjukin kalau aku seneng denger cerita <b>ko</b>, apalagi soal kartun <i>the good dinosaur</i> itu...<br><br>
+                Terus aku juga lalai ga bales bubble chat <b>ko</b>, padahal itu hal kecil tapi berarti. Aku ga ada niat buat cuek atau ga peduli, cuma tadi aku lagi ga fokus dan itu salah aku.<br><br>
+                Maafin aku yaa, aku pengen jadi orang yang selalu hadir penuh buat <b>ko</b>, dengerin cerita <b>ko</b> dengan bener-bener, dan respon dengan antusias kaya yang <b>ko</b> pantas dapet.
+            </p>
+        </div>
     </div>
 
     <script>
         let bloom = 0;
         let targetBloom = 0;
         let song;
-        let songReady = false;
+        let stars = [];
 
         function preload() {
-            // Memastikan nama file sama persis dengan yang di upload ke GitHub
-            song = loadSound('Reza_-_keabadian_(mp3.pm).mp3', 
-                () => { songReady = true; }, 
-                () => { console.log("Lagu gagal load, tapi bunga tetap jalan."); }
-            ); 
+            // Memastikan lagu Keabadian terisi
+            song = loadSound('Reza_-_keabadian_(mp3.pm).mp3');
         }
 
         function setup() {
             createCanvas(windowWidth, windowHeight);
-            angleMode(DEGREES);
+            for (let i = 0; i < 80; i++) {
+                stars.push({ x: random(width), y: random(height), size: random(1, 2), speed: random(0.2, 0.5) });
+            }
         }
 
         function draw() {
-            background(15, 10, 15);
-            bloom = lerp(bloom, targetBloom, 0.02);
+            background(10, 10, 12);
             
-            translate(width / 2, height * 0.35);
-
-            // Batang
-            stroke(40, 80, 40);
-            strokeWeight(3);
-            line(0, 0, 0, height);
-
-            // Kelopak
+            // Background Bintang Partikel
             noStroke();
-            for (let i = 0; i < 10; i++) {
+            fill(255, 255, 255, 100);
+            stars.forEach(s => {
+                circle(s.x, s.y, s.size);
+                s.y -= s.speed;
+                if (s.y < 0) s.y = height;
+            });
+
+            bloom = lerp(bloom, targetBloom, 0.02);
+            translate(width / 2, height * 0.4);
+
+            if (bloom > 0.01) {
+                drawFlower(bloom);
+            }
+        }
+
+        function drawFlower(b) {
+            for (let i = 0; i < 12; i++) {
                 push();
-                rotate(i * 36 + (sin(frameCount * 0.5 + i*20) * 5));
-                fill(255, 182, 193, 200);
-                let petalSize = bloom * 130;
+                rotate(i * 30 + frameCount * 0.2);
+                let petalColor = color(255, 182, 193); // Soft Pink
+                petalColor.setAlpha(150);
+                fill(petalColor);
+                
                 beginShape();
+                let size = b * (width * 0.25);
                 vertex(0, 0);
-                bezierVertex(-petalSize/2, -petalSize/2, -petalSize/3, -petalSize, 0, -petalSize);
-                bezierVertex(petalSize/3, -petalSize, petalSize/2, -petalSize/2, 0, 0);
+                bezierVertex(-size/2, -size/2, -size/3, -size, 0, -size);
+                bezierVertex(size/3, -size, size/2, -size/2, 0, 0);
                 endShape();
                 pop();
             }
-            // Putik
-            fill(255, 230, 100);
-            circle(0, 0, bloom * 25);
+            fill(255, 220, 100);
+            circle(0, 0, b * 20);
         }
 
         function mousePressed() {
             targetBloom = 1;
-            document.getElementById('msg').classList.add('show');
+            document.getElementById('msg').classList.add('reveal');
             document.getElementById('ins').style.display = 'none';
-            if (songReady && !song.isPlaying()) {
+            if (song.isLoaded() && !song.isPlaying()) {
                 song.play();
             }
         }
@@ -99,3 +124,4 @@
     </script>
 </body>
 </html>
+
