@@ -2,50 +2,103 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Bunga Bersenja Gurau</title>
+    <title>Untuk Sayangku Farah</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background-color: #1a0a0a; }
-        canvas { display: block; }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #0d0202; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        .instruction {
+            position: absolute; top: 30px; width: 100%; text-align: center;
+            color: #ffb7b2; font-size: 0.8rem; letter-spacing: 2px;
+            animation: blink 2s infinite; z-index: 10; text-transform: uppercase;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+        .message-container {
+            position: absolute; bottom: 8%; width: 100%;
+            text-align: center; color: #fdf2f2; padding: 0 25px;
+            box-sizing: border-box; pointer-events: none;
+        }
+        p { 
+            font-size: 0.9rem; line-height: 1.6; max-width: 450px; 
+            margin: 0 auto; color: #fdf2f2; font-weight: 300;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+        b { color: #ff9aa2; }
     </style>
 </head>
 <body>
+    <div class="instruction">Tap layarnya pelan-pelan...</div>
+    <div class="message-container">
+        <p>
+            Aku mau minta maaf yaa <b>sayangg</b>, tadi aku kurang excited pas <b>ko</b> cerita, harusnya aku bisa lebih nunjukin kalau aku seneng denger cerita <b>ko</b>, apalagi soal kartun <i>the good dinosaur</i> itu... <br><br>
+            Terus aku juga lalai ga bales bubble chat <b>ko</b>, padahal itu hal kecil tapi berarti. Aku ga ada niat buat cuek atau ga peduli, cuma tadi aku lagi ga fokus dan itu salah aku. Maafin aku yaa, aku pengen jadi orang yang selalu hadir penuh buat <b>ko</b>, dengerin cerita <b>ko</b> dengan bener-bener, dan respon dengan antusias kaya yang <b>ko</b> pantas dapet.
+        </p>
+    </div>
+
     <script>
+        let bloom = 0;
+        let targetBloom = 0;
+        let song;
+
+        function preload() {
+            // Ko Gemini pakai musik piano lembut agar suasana minta maafnya dapet
+            song = loadSound('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'); 
+        }
+
         function setup() {
             createCanvas(windowWidth, windowHeight);
             angleMode(DEGREES);
-            colorMode(HSB);
         }
 
         function draw() {
-            // Latar belakang gradasi senja gelap
-            background(10, 20, 15); 
-            translate(width / 2, height / 2);
+            background(15, 8, 12);
+            bloom = lerp(bloom, targetBloom, 0.025);
+            
+            // Posisi bunga agak ke atas supaya tidak tertutup teks panjang
+            translate(width / 2, height * 0.35);
 
-            for (let n = 0; n < 250; n++) {
-                let a = n * 137.5;
-                let r = 10 * sqrt(n);
+            // Batang
+            stroke(40, 100, 40);
+            strokeWeight(3);
+            line(0, 0, 0, height);
 
-                let x = r * cos(a);
-                let y = r * sin(a);
-
-                // Efek bergoyang (bersenja gurau)
-                let sway = sin(frameCount * 2 + n) * 5;
-                
-                // Warna kelopak (Jingga, Pink, Ungu)
-                fill(n % 60 + 10, 80, 100, 0.8);
-                noStroke();
-                
+            // Kelopak bunga cantik
+            noStroke();
+            for (let i = 0; i < 10; i++) {
                 push();
-                translate(x + sway, y + sway);
-                rotate(a + frameCount * 0.3);
-                ellipse(0, 0, 15, 25);
+                rotate(i * 36 + (sin(frameCount * 0.4 + i*20) * 4));
+                
+                // Warna gradasi soft pink ke ungu senja
+                let r = map(bloom, 0, 1, 255, 255);
+                let g = map(bloom, 0, 1, 182, 100);
+                let b = map(bloom, 0, 1, 193, 150);
+                fill(r, g, b, 180);
+                
+                beginShape();
+                let petalSize = bloom * 130;
+                vertex(0, 0);
+                bezierVertex(-petalSize/2, -petalSize/2, -petalSize/3, -petalSize, 0, -petalSize);
+                bezierVertex(petalSize/3, -petalSize, petalSize/2, -petalSize/2, 0, 0);
+                endShape();
                 pop();
             }
-            
-            // Inti bunga yang bersinar
-            fill(45, 100, 100);
-            circle(0, 0, 30);
+
+            // Putik bunga
+            fill(255, 230, 100);
+            circle(0, 0, bloom * 25);
+        }
+
+        function mousePressed() {
+            if (targetBloom === 0) {
+                targetBloom = 1;
+                if (song.isLoaded() && !song.isPlaying()) {
+                    song.play();
+                    song.setVolume(0.5);
+                }
+            } else {
+                targetBloom = 0;
+                song.pause();
+            }
         }
 
         function windowResized() {
@@ -55,3 +108,4 @@
 </body>
 </html>
 
+    
