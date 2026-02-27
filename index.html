@@ -7,7 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background-color: #0d0202; font-family: 'Georgia', serif; }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #0d0202; font-family: sans-serif; }
+        canvas { display: block; }
         .instruction {
             position: absolute; top: 30px; width: 100%; text-align: center;
             color: #ffb7b2; font-size: 0.8rem; letter-spacing: 2px;
@@ -20,16 +21,16 @@
             box-sizing: border-box; pointer-events: none;
             opacity: 0; transition: opacity 3s;
         }
-        .show { opacity: 1; }
-        p { font-size: 0.9rem; line-height: 1.6; max-width: 500px; margin: 0 auto; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); }
+        .show { opacity: 1 !important; }
+        p { font-size: 0.85rem; line-height: 1.6; max-width: 500px; margin: 0 auto; text-shadow: 1px 1px 5px rgba(0,0,0,1); }
         b { color: #ff9aa2; }
     </style>
 </head>
 <body>
-    <div class="instruction" id="ins">Sentuh layarnya pelan-pelan, Sayang...</div>
+    <div class="instruction" id="ins">SENTUH LAYARNYA...</div>
     <div class="message-container" id="msg">
         <p>
-            Aku mau minta maaf yaa <b>sayangg</b>, tadi aku kurang excited pas <b>ko</b> cerita, harusnya aku bisa lebih nunjukin kalau aku seneng denger cerita <b>ko</b>, apalagi soal kartu <i>the good dinosaur</i> itu... <br><br>
+            Aku mau minta maaf yaa <b>sayangg</b>, tadi aku kurang excited pas <b>ko</b> cerita, harusnya aku bisa lebih nunjukin kalau aku seneng denger cerita <b>ko</b>, apalagi soal kartun <i>the good dinosaur</i> itu... <br><br>
             Terus aku juga lalai ga bales bubble chat <b>ko</b>, padahal itu hal kecil tapi berarti. Aku ga ada niat buat cuek atau ga peduli, cuma tadi aku lagi ga fokus dan itu salah aku. Maafin aku yaa, aku pengen jadi orang yang selalu hadir penuh buat <b>ko</b>, dengerin cerita <b>ko</b> dengan bener-bener, dan respon dengan antusias kaya yang <b>ko</b> pantas dapet.
         </p>
     </div>
@@ -38,10 +39,14 @@
         let bloom = 0;
         let targetBloom = 0;
         let song;
+        let songReady = false;
 
         function preload() {
-            // Memuat lagu "Keabadian" yang kamu berikan
-            song = loadSound('Reza_-_keabadian_(mp3.pm).mp3'); 
+            // Memastikan nama file sama persis dengan yang di upload ke GitHub
+            song = loadSound('Reza_-_keabadian_(mp3.pm).mp3', 
+                () => { songReady = true; }, 
+                () => { console.log("Lagu gagal load, tapi bunga tetap jalan."); }
+            ); 
         }
 
         function setup() {
@@ -50,40 +55,22 @@
         }
 
         function draw() {
-            background(15, 10, 20);
+            background(15, 10, 15);
             bloom = lerp(bloom, targetBloom, 0.02);
             
-            // Menggambar Dinosaurus (Arlo) di latar belakang
-            drawDino();
+            translate(width / 2, height * 0.35);
 
-            translate(width / 2, height * 0.38);
+            // Batang
+            stroke(40, 80, 40);
+            strokeWeight(3);
+            line(0, 0, 0, height);
 
-            // Bunga yang mekar
-            drawFlower();
-        }
-
-        function drawDino() {
-            push();
-            noStroke();
-            fill(30, 50, 30, 100); // Warna hijau gelap transparan
-            // Siluet leher panjang Arlo
-            translate(width * 0.2, height * 0.7);
-            beginShape();
-            vertex(0, 0);
-            bezierVertex(20, -100, 50, -150, 100, -180); // Leher
-            bezierVertex(120, -190, 140, -180, 130, -160); // Kepala
-            bezierVertex(120, -150, 100, -140, 80, -130);
-            vertex(100, 0);
-            endShape(CLOSE);
-            pop();
-        }
-
-        function drawFlower() {
+            // Kelopak
             noStroke();
             for (let i = 0; i < 10; i++) {
                 push();
                 rotate(i * 36 + (sin(frameCount * 0.5 + i*20) * 5));
-                fill(255, 180, 190, 180);
+                fill(255, 182, 193, 200);
                 let petalSize = bloom * 130;
                 beginShape();
                 vertex(0, 0);
@@ -92,22 +79,23 @@
                 endShape();
                 pop();
             }
+            // Putik
             fill(255, 230, 100);
             circle(0, 0, bloom * 25);
         }
 
         function mousePressed() {
-            if (targetBloom === 0) {
-                targetBloom = 1;
-                document.getElementById('msg').classList.add('show');
-                document.getElementById('ins').style.display = 'none';
-                if (!song.isPlaying()) {
-                    song.play();
-                }
+            targetBloom = 1;
+            document.getElementById('msg').classList.add('show');
+            document.getElementById('ins').style.display = 'none';
+            if (songReady && !song.isPlaying()) {
+                song.play();
             }
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
         }
     </script>
 </body>
 </html>
-
-    
